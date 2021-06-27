@@ -1,4 +1,4 @@
-# flutter_canvas
+# blossom_canvas
 
 A new Flutter package project.
 
