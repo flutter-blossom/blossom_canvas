@@ -6,22 +6,23 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'controller.dart';
 
 class CanvasView extends HookWidget {
-  CanvasView({
-    Key? key,
-    required this.controller,
-    this.maxZoom = 2.0,
-    this.minZoom = 0.5,
-    this.enableControls = true,
-    this.backgroundColor,
-    this.borderColor = Colors.blue,
-    required this.onSelect,
-    required this.onDeviceChange,
-    required this.onDrag,
-    required this.onZoom,
-    required this.onRemove,
-    required this.onAdd,
-    required this.onRotate,
-  }) : super(key: key);
+  CanvasView(
+      {Key? key,
+      required this.controller,
+      this.maxZoom = 2.0,
+      this.minZoom = 0.5,
+      this.enableControls = true,
+      this.backgroundColor,
+      this.borderColor = Colors.blue,
+      required this.onSelect,
+      required this.onDeviceChange,
+      required this.onDrag,
+      required this.onZoom,
+      required this.onRemove,
+      required this.onAdd,
+      required this.onRotate,
+      required this.onError})
+      : super(key: key);
   final double maxZoom;
   final double minZoom;
   final bool enableControls;
@@ -32,6 +33,7 @@ class CanvasView extends HookWidget {
   final void Function(CanvasItem item) onAdd;
   final void Function(CanvasItem item) onRotate;
   final void Function(double zoom) onZoom;
+  final void Function(FlutterErrorDetails details) onError;
   final void Function(
           bool value, Offset delta, CanvasItem? item, List<CanvasItem> overlaps)
       onDrag;
@@ -208,23 +210,47 @@ class CanvasView extends HookWidget {
                                   SizedBox(
                                     height: 19,
                                   ),
-                                Container(
-                                  width: e.size.width,
-                                  height: e.size.height,
-                                  decoration: BoxDecoration(
-                                    border: Border.all(
-                                      color: borderColor.withOpacity(
-                                          selectedItem.value?.key == e.key &&
-                                                  enableControls
-                                              ? 1
-                                              : 0),
-                                      width: 2.5,
-                                    ),
-                                  ),
-                                  padding: const EdgeInsets.all(0.5),
-                                  child: ClipRRect(
-                                    child: e.child,
-                                  ),
+                                WidgetsApp(
+                                  color: Colors.blue,
+                                  debugShowCheckedModeBanner: false,
+                                  builder: (_, __) {
+                                    ErrorWidget.builder =
+                                        (FlutterErrorDetails errorDetails) {
+                                      onError(errorDetails);
+                                      return Center(
+                                          child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Icon(Icons.error,
+                                              size: 20, color: Colors.red),
+                                          Text(
+                                            errorDetails.summary.toString() +
+                                                ' !!',
+                                            style: TextStyle(color: Colors.red),
+                                          ),
+                                        ],
+                                      ));
+                                    };
+                                    return Container(
+                                      width: e.size.width,
+                                      height: e.size.height,
+                                      decoration: BoxDecoration(
+                                        border: Border.all(
+                                          color: borderColor.withOpacity(
+                                              selectedItem.value?.key ==
+                                                          e.key &&
+                                                      enableControls
+                                                  ? 1
+                                                  : 0),
+                                          width: 2.5,
+                                        ),
+                                      ),
+                                      padding: const EdgeInsets.all(0.5),
+                                      child: ClipRRect(
+                                        child: e.child,
+                                      ),
+                                    );
+                                  },
                                 ),
                               ],
                             ),
